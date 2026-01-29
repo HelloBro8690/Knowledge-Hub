@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoubtClear - Student Teacher Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen active">
+        <div class="glass-card login-card">
+            <h1>DoubtClear</h1>
+            <p>Clarify doubts instantly</p>
+            <div class="role-tabs">
+                <button class="tab-btn active" onclick="switchRole('student')">Student</button>
+                <button class="tab-btn" onclick="switchRole('teacher')">Teacher</button>
+            </div>
+            <form id="loginForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <p class="demo-note">Demo: student/student or teacher/teacher</p>
+        </div>
+    </div>
+
+    <!-- Student Dashboard -->
+    <div id="studentDash" class="screen dashboard">
+        <header class="glass-header">
+            <h2>Student Dashboard</h2>
+            <button onclick="logout()">Logout</button>
+        </header>
+        <main>
+            <section class="subjects-grid">
+                <h3>Select Subject</h3>
+                <div class="cards-grid">
+                    <div class="subject-card" data-subject="Math">Mathematics</div>
+                    <div class="subject-card" data-subject="Science">Science</div>
+                    <div class="subject-card" data-subject="English">English</div>
+                </div>
+            </section>
+            <section id="postDoubtSection" class="hidden">
+                <h3>Post Doubt (Anonymous)</h3>
+                <textarea id="doubtText" placeholder="Describe your doubt..."></textarea>
+                <button onclick="postDoubt()">Post Doubt</button>
+            </section>
+            <section id="answersSection">
+                <h3>Your Doubts & Answers</h3>
+                <div id="answersList"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Teacher Dashboard -->
+    <div id="teacherDash" class="screen dashboard">
+        <header class="glass-header">
+            <h2>Teacher Dashboard</h2>
+            <button onclick="logout()">Logout</button>
+        </header>
+        <main>
+            <section id="notifications">
+                <h3>New Doubts</h3>
+                <div id="doubtsList"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
