@@ -7,6 +7,11 @@ const demoUsers = {
 let currentUser = null;
 let currentSubject = '';
 
+// Initialize login form with default role (student)
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('loginForm').dataset.role = 'student';
+});
+
 // Role switch
 function switchRole(role) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -19,13 +24,14 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = document.getElementById('username').value;
     const pass = document.getElementById('password').value;
-    const role = document.getElementById('loginForm').dataset.role;
+    const role = document.getElementById('loginForm').dataset.role || 'student'; // Default to student if not set
+    
     if (demoUsers[user] && demoUsers[user].pass === pass && demoUsers[user].role === role) {
         currentUser = { name: user, role };
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         showDashboard();
     } else {
-        alert('Invalid credentials. Use demo: student/student or teacher/teacher');
+        alert('Invalid credentials.\n\nDemo Credentials:\nUsername: student\nPassword: student\n(or teacher/teacher)');
     }
 });
 
