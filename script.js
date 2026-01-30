@@ -48,6 +48,7 @@ function showDashboard() {
             loadStudentClasses();
             loadStudentNotes();
             loadStudentDoubts();
+            checkLiveClasses(); // Check for live classes
         } else {
             loadTeacherStats();
             loadTeacherClasses();
@@ -177,7 +178,7 @@ function loadStudentClasses() {
             <div class="class-subject">${c.subject}</div>
             <p class="class-description">${c.description || 'No description'}</p>
             <div class="class-actions">
-                <button class="btn-action" onclick="openVideo('${c.videoUrl}')">▶ Watch</button>
+                <button class="btn-action" onclick="openVideo('${c.videoUrl}', ${c.id})">▶ Watch</button>
                 <button class="btn-action" onclick="downloadClass(${c.id})">⬇ Details</button>
             </div>
         </div>
@@ -311,9 +312,135 @@ function uploadClass() {
     alert('Class uploaded successfully!');
 }
 
+// Update class
+function updateClass(id) {
+    const title = document.getElementById('classTitle').value;
+    const subject = document.getElementById('classSubject').value;
+    const description = document.getElementById('classDescription').value;
+    const videoUrl = document.getElementById('classVideoUrl').value;
+    
+    if (!title || !subject || !videoUrl) {
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    const classes = JSON.parse(localStorage.getItem('classes') || '[]');
+    const classData = classes.find(c => c.id === id);
+    
+    if (classData) {
+        classData.title = title;
+        classData.subject = subject;
+        classData.description = description;
+        classData.videoUrl = videoUrl;
+        classData.updatedAt = new Date().toLocaleString();
+        localStorage.setItem('classes', JSON.stringify(classes));
+        
+        // Reset form
+        document.getElementById('classTitle').value = '';
+        document.getElementById('classSubject').value = '';
+        document.getElementById('classDescription').value = '';
+        document.getElementById('classVideoUrl').value = '';
+        
+        // Reset button
+        const uploadBtn = document.querySelector('#teacherClassesTab .btn-primary');
+        uploadBtn.textContent = 'Upload Class';
+        uploadBtn.onclick = uploadClass;
+        delete uploadBtn.dataset.editId;
+        
+        loadTeacherClasses();
+        loadTeacherStats();
+        alert('Class updated successfully!');
+    }
+}
+
 // Go Live
 function goLive() {
-    alert('🔴 Live streaming would be configured here. For now, upload video URLs or join a video conference platform.');
+    const title = prompt('Enter Live Class Title:');
+    if (!title) return;
+    
+    const subject = document.getElementById('classSubject').value;
+    if (!subject) {
+        alert('Please select a subject first');
+        return;
+    }
+    
+    const youtubeUrl = prompt('Enter YouTube Live Stream URL:\n(e.g., https://www.youtube.com/watch?v=...\nor https://youtu.be/...)');
+    if (!youtubeUrl) return;
+    
+    const liveClass = {
+        id: Date.now(),
+        title: title,
+        subject: subject,
+        teacher: currentUser.name,
+        youtubeUrl: youtubeUrl,
+        startedAt: new Date().toLocaleString(),
+        status: 'live'
+    };
+    
+    // Store live class
+    let liveClasses = JSON.parse(localStorage.getItem('liveClasses') || '[]');
+    liveClasses.push(liveClass);
+    localStorage.setItem('liveClasses', JSON.stringify(liveClasses));
+    
+    alert(`✅ Live Class Started!\n\nTitle: ${title}\nSubject: ${subject}\n\nStudents will be notified and can join the YouTube Live!`);
+}
+
+// Check for live classes and notify students
+function checkLiveClasses() {
+    const liveClasses = JSON.parse(localStorage.getItem('liveClasses') || '[]');
+    const notificationArea = document.getElementById('liveClassNotification');
+    
+    if (liveClasses.length > 0) {
+        const liveClass = liveClasses[liveClasses.length - 1]; // Get the most recent live class
+        notificationArea.innerHTML = `
+            <div class="live-notification">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <span style="animation: pulse-red 1s infinite; font-size: 20px;">🔴</span>
+                    <strong>LIVE CLASS IN SESSION</strong>
+                </div>
+                <p style="margin-bottom: 10px;"><strong>${liveClass.title}</strong> (${liveClass.subject})</p>
+                <p style="margin-bottom: 15px; font-size: 12px; opacity: 0.8;">by ${liveClass.teacher}</p>
+                <button onclick="joinLiveClass(${liveClass.id})" class="btn-primary" style="width: 100%;">📹 Join Live Class</button>
+            </div>
+        `;
+        notificationArea.classList.remove('hidden');
+    } else {
+        notificationArea.classList.add('hidden');
+    }
+}
+
+// Join live class
+function joinLiveClass(classId) {
+    const liveClasses = JSON.parse(localStorage.getItem('liveClasses') || '[]');
+    const liveClass = liveClasses.find(c => c.id === classId);
+    
+    if (liveClass) {
+        // Convert YouTube URL to embed format
+        let embedUrl = liveClass.youtubeUrl;
+        if (embedUrl.includes('youtube.com/watch')) {
+            embedUrl = embedUrl.replace('watch?v=', 'embed/').split('&')[0];
+        } else if (embedUrl.includes('youtu.be')) {
+            embedUrl = embedUrl.replace('youtu.be/', 'youtube.com/embed/');
+        }
+        
+        // Show live stream in video player
+        const playerSection = document.getElementById('videoPlayer');
+        const videoFrame = document.getElementById('videoFrame');
+        const videoDetails = document.getElementById('videoDetails');
+        
+        videoFrame.src = embedUrl;
+        
+        videoDetails.innerHTML = `
+            <h3>🔴 LIVE CLASS</h3>
+            <p><strong>Title:</strong> ${liveClass.title}</p>
+            <p><strong>Subject:</strong> ${liveClass.subject}</p>
+            <p><strong>Teacher:</strong> ${liveClass.teacher}</p>
+            <p><strong>Status:</strong> <span style="color: #fca5a5; font-weight: 700;">LIVE NOW</span></p>
+        `;
+        
+        playerSection.classList.remove('hidden');
+        playerSection.scrollIntoView({ behavior: 'smooth' });
+    }
 }
 
 // Load teacher classes
@@ -348,6 +475,29 @@ function deleteClass(id) {
     localStorage.setItem('classes', JSON.stringify(filtered));
     loadTeacherClasses();
     loadTeacherStats();
+}
+
+// Edit class
+function editClass(id) {
+    const classes = JSON.parse(localStorage.getItem('classes') || '[]');
+    const classData = classes.find(c => c.id === id);
+    
+    if (!classData) return;
+    
+    // Pre-fill the form with existing data
+    document.getElementById('classTitle').value = classData.title;
+    document.getElementById('classSubject').value = classData.subject;
+    document.getElementById('classDescription').value = classData.description || '';
+    document.getElementById('classVideoUrl').value = classData.videoUrl;
+    
+    // Change button text and set data attribute to indicate editing
+    const uploadBtn = document.querySelector('#teacherClassesTab .btn-primary');
+    uploadBtn.textContent = 'Update Class';
+    uploadBtn.dataset.editId = id;
+    uploadBtn.onclick = () => updateClass(id);
+    
+    // Scroll to form
+    document.querySelector('#teacherClassesTab .upload-form').scrollIntoView({ behavior: 'smooth' });
 }
 
 // Upload notes
@@ -423,12 +573,44 @@ function deleteNote(id) {
 }
 
 // Helper functions
-function openVideo(url) {
-    if (url.includes('youtube')) {
-        window.open(url, '_blank');
-    } else {
-        alert('Video URL: ' + url);
+function openVideo(url, classId) {
+    const playerSection = document.getElementById('videoPlayer');
+    const videoFrame = document.getElementById('videoFrame');
+    const videoDetails = document.getElementById('videoDetails');
+    
+    // Convert YouTube URL to embed format
+    let embedUrl = url;
+    if (url.includes('youtube.com/watch')) {
+        embedUrl = url.replace('watch?v=', 'embed/').split('&')[0];
+    } else if (url.includes('youtu.be')) {
+        embedUrl = url.replace('youtu.be/', 'youtube.com/embed/');
     }
+    
+    videoFrame.src = embedUrl;
+    
+    // Show class details
+    if (classId) {
+        const classes = JSON.parse(localStorage.getItem('classes') || '[]');
+        const classData = classes.find(c => c.id === classId);
+        if (classData) {
+            videoDetails.innerHTML = `
+                <h3>${classData.title}</h3>
+                <p><strong>Subject:</strong> ${classData.subject}</p>
+                <p><strong>Description:</strong> ${classData.description || 'No description'}</p>
+                <p><strong>Uploaded:</strong> ${classData.uploadedAt}</p>
+            `;
+        }
+    }
+    
+    playerSection.classList.remove('hidden');
+    playerSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+function closeVideo() {
+    const playerSection = document.getElementById('videoPlayer');
+    const videoFrame = document.getElementById('videoFrame');
+    videoFrame.src = '';
+    playerSection.classList.add('hidden');
 }
 
 function downloadClass(id) {
@@ -454,8 +636,48 @@ function viewNote(id) {
     const notes = JSON.parse(localStorage.getItem('notes') || '[]');
     const n = notes.find(x => x.id === id);
     if (n) {
-        alert(`${n.title}\n\n${n.description || 'No description'}\n\nFile: ${n.fileName}`);
+        const previewSection = document.getElementById('notePreview');
+        const noteContent = document.getElementById('noteContent');
+        
+        // Determine file type and create preview
+        const fileName = n.fileName || '';
+        let preview = '';
+        
+        if (fileName.endsWith('.pdf')) {
+            preview = `<embed src="${n.fileData}" type="application/pdf" width="100%" height="800">`;
+        } else if (fileName.endsWith('.txt')) {
+            preview = `<pre style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; white-space: pre-wrap; word-wrap: break-word;">${n.fileData || 'No content'}</pre>`;
+        } else {
+            preview = `
+                <div style="background: rgba(59, 130, 246, 0.15); padding: 30px; border-radius: 10px; text-align: center;">
+                    <h3>${n.title}</h3>
+                    <p><strong>Subject:</strong> ${n.subject}</p>
+                    <p><strong>Description:</strong> ${n.description || 'No description'}</p>
+                    <p><strong>File:</strong> ${fileName}</p>
+                    <p style="margin-top: 20px; opacity: 0.8;">This file type cannot be previewed. Please download to view.</p>
+                </div>
+            `;
+        }
+        
+        noteContent.innerHTML = `
+            <div style="margin-bottom: 20px;">
+                <h3>${n.title}</h3>
+                <p><strong>Subject:</strong> ${n.subject}</p>
+                <p><strong>Description:</strong> ${n.description || 'No description'}</p>
+            </div>
+            ${preview}
+        `;
+        
+        previewSection.classList.remove('hidden');
+        previewSection.scrollIntoView({ behavior: 'smooth' });
     }
+}
+
+function closePreview() {
+    const previewSection = document.getElementById('notePreview');
+    const noteContent = document.getElementById('noteContent');
+    noteContent.innerHTML = '';
+    previewSection.classList.add('hidden');
 }
 
 // Rating system

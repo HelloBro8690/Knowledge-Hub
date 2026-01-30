@@ -41,6 +41,7 @@
         <main>
             <!-- Home Tab -->
             <section id="studentHomeTab" class="tab-content active">
+                <div id="liveClassNotification" class="hidden"></div>
                 <div class="welcome-banner glass-card">
                     <h2>Welcome Back!</h2>
                     <p>Continue your learning journey with DoubtClear</p>
@@ -85,12 +86,23 @@
             <!-- Video Classes Tab -->
             <section id="studentClassesTab" class="tab-content">
                 <h3>Video Classes</h3>
+                <div id="videoPlayer" class="video-player-section hidden">
+                    <button onclick="closeVideo()" class="close-video-btn">✕ Close</button>
+                    <iframe id="videoFrame" width="100%" height="600" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <div id="videoDetails" style="margin-top: 20px;"></div>
+                </div>
                 <div class="classes-grid" id="studentClassesList"></div>
             </section>
 
             <!-- Notes Tab -->
             <section id="studentNotesTab" class="tab-content">
                 <h3>Study Materials & Notes</h3>
+                <div id="notePreview" class="note-preview-section hidden">
+                    <div class="preview-controls">
+                        <button onclick="closePreview()" class="close-preview-btn">✕ Close</button>
+                    </div>
+                    <div id="noteContent" class="note-content-viewer"></div>
+                </div>
                 <div class="notes-grid" id="studentNotesList"></div>
             </section>
         </main>
@@ -166,9 +178,11 @@
                         <label>Video URL (YouTube) *</label>
                         <input type="text" id="classVideoUrl" placeholder="https://youtube.com/embed/...">
                     </div>
-                    <div class="form-group">
-                        <label>Or Go Live Now</label>
-                        <button class="btn-secondary" onclick="goLive()">🔴 Start Live Class</button>
+                    <div class="live-class-form">
+                        <h4>🔴 Start YouTube Live Class</h4>
+                        <p style="color: #f5d5d5; font-size: 13px; margin-bottom: 15px;">Go live on YouTube and all logged-in students will be notified instantly. They can join and watch your live stream directly.</p>
+                        <p style="color: #f5d5d5; font-size: 12px; margin-bottom: 15px; opacity: 0.8;"><strong>Steps:</strong> 1. Start a YouTube Live stream 2. Click the button below 3. Enter your YouTube Live URL 4. Students get instant notification</p>
+                        <button class="btn-secondary" onclick="goLive()">🔴 Start YouTube Live Class</button>
                     </div>
                     <button class="btn-primary" onclick="uploadClass()">Upload Class</button>
                 </div>
