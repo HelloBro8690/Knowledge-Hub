@@ -26,43 +26,185 @@
         </div>
     </div>
 
-    <!-- Student Dashboard -->
-    <div id="studentDash" class="screen dashboard">
+    <!-- Student Home -->
+    <div id="studentHome" class="screen">
         <header class="glass-header">
-            <h2>Student Dashboard</h2>
-            <button onclick="logout()">Logout</button>
+            <h2>DoubtClear - Student Portal</h2>
+            <button class="logout-btn" onclick="logout()">Logout</button>
         </header>
+        <nav class="nav-menu">
+            <button class="nav-btn active" onclick="switchStudentTab('home')">Home</button>
+            <button class="nav-btn" onclick="switchStudentTab('doubts')">Doubts</button>
+            <button class="nav-btn" onclick="switchStudentTab('classes')">Video Classes</button>
+            <button class="nav-btn" onclick="switchStudentTab('notes')">Notes & Materials</button>
+        </nav>
         <main>
-            <section class="subjects-grid">
-                <h3>Select Subject</h3>
-                <div class="cards-grid">
-                    <div class="subject-card" data-subject="Math">Mathematics</div>
-                    <div class="subject-card" data-subject="Science">Science</div>
-                    <div class="subject-card" data-subject="English">English</div>
+            <!-- Home Tab -->
+            <section id="studentHomeTab" class="tab-content active">
+                <div class="welcome-banner glass-card">
+                    <h2>Welcome Back!</h2>
+                    <p>Continue your learning journey with DoubtClear</p>
+                </div>
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <h3 id="doubtCount">0</h3>
+                        <p>Your Doubts</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="classCount">0</h3>
+                        <p>Classes</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="notesCount">0</h3>
+                        <p>Notes</p>
+                    </div>
                 </div>
             </section>
-            <section id="postDoubtSection" class="hidden">
-                <h3>Post Doubt (Anonymous)</h3>
-                <textarea id="doubtText" placeholder="Describe your doubt..."></textarea>
-                <button onclick="postDoubt()">Post Doubt</button>
+
+            <!-- Doubts Tab -->
+            <section id="studentDoubtsTab" class="tab-content">
+                <section class="subjects-grid">
+                    <h3>Select Subject to Post Doubt</h3>
+                    <div class="cards-grid">
+                        <div class="subject-card" data-subject="Math">Mathematics</div>
+                        <div class="subject-card" data-subject="Science">Science</div>
+                        <div class="subject-card" data-subject="English">English</div>
+                    </div>
+                </section>
+                <section id="postDoubtSection" class="hidden">
+                    <h3>Post Doubt (Anonymous)</h3>
+                    <textarea id="doubtText" placeholder="Describe your doubt..."></textarea>
+                    <button onclick="postDoubt()">Post Doubt</button>
+                </section>
+                <section id="answersSection">
+                    <h3>Your Doubts & Answers</h3>
+                    <div id="answersList"></div>
+                </section>
             </section>
-            <section id="answersSection">
-                <h3>Your Doubts & Answers</h3>
-                <div id="answersList"></div>
+
+            <!-- Video Classes Tab -->
+            <section id="studentClassesTab" class="tab-content">
+                <h3>Video Classes</h3>
+                <div class="classes-grid" id="studentClassesList"></div>
+            </section>
+
+            <!-- Notes Tab -->
+            <section id="studentNotesTab" class="tab-content">
+                <h3>Study Materials & Notes</h3>
+                <div class="notes-grid" id="studentNotesList"></div>
             </section>
         </main>
+    </div>
+
+    <!-- Student Dashboard (kept for compatibility) -->
+    <div id="studentDash" class="screen dashboard" style="display: none;">
     </div>
 
     <!-- Teacher Dashboard -->
     <div id="teacherDash" class="screen dashboard">
         <header class="glass-header">
-            <h2>Teacher Dashboard</h2>
-            <button onclick="logout()">Logout</button>
+            <h2>Teacher Portal</h2>
+            <button class="logout-btn" onclick="logout()">Logout</button>
         </header>
+        <nav class="nav-menu">
+            <button class="nav-btn active" onclick="switchTeacherTab('home')">Home</button>
+            <button class="nav-btn" onclick="switchTeacherTab('doubts')">Answer Doubts</button>
+            <button class="nav-btn" onclick="switchTeacherTab('classes')">Upload Class</button>
+            <button class="nav-btn" onclick="switchTeacherTab('notes')">Upload Notes</button>
+        </nav>
         <main>
-            <section id="notifications">
+            <!-- Home Tab -->
+            <section id="teacherHomeTab" class="tab-content active">
+                <div class="welcome-banner glass-card">
+                    <h2>Welcome Teacher!</h2>
+                    <p>Manage your classes and answer student doubts</p>
+                </div>
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <h3 id="pendingDoubts">0</h3>
+                        <p>Pending Doubts</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="uploadedClasses">0</h3>
+                        <p>Classes Uploaded</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="uploadedNotes">0</h3>
+                        <p>Notes Uploaded</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Answer Doubts Tab -->
+            <section id="teacherDoubtsTab" class="tab-content">
                 <h3>New Doubts</h3>
                 <div id="doubtsList"></div>
+            </section>
+
+            <!-- Upload Class Tab -->
+            <section id="teacherClassesTab" class="tab-content">
+                <h3>Upload Video Class</h3>
+                <div class="upload-form glass-card">
+                    <div class="form-group">
+                        <label>Class Title *</label>
+                        <input type="text" id="classTitle" placeholder="e.g., Algebra Basics">
+                    </div>
+                    <div class="form-group">
+                        <label>Subject *</label>
+                        <select id="classSubject">
+                            <option value="">Select Subject</option>
+                            <option value="Math">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="classDescription" placeholder="Class description..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Video URL (YouTube) *</label>
+                        <input type="text" id="classVideoUrl" placeholder="https://youtube.com/embed/...">
+                    </div>
+                    <div class="form-group">
+                        <label>Or Go Live Now</label>
+                        <button class="btn-secondary" onclick="goLive()">🔴 Start Live Class</button>
+                    </div>
+                    <button class="btn-primary" onclick="uploadClass()">Upload Class</button>
+                </div>
+                <h3 style="margin-top: 40px;">Your Classes</h3>
+                <div class="classes-grid" id="teacherClassesList"></div>
+            </section>
+
+            <!-- Upload Notes Tab -->
+            <section id="teacherNotesTab" class="tab-content">
+                <h3>Upload Study Materials</h3>
+                <div class="upload-form glass-card">
+                    <div class="form-group">
+                        <label>Material Title *</label>
+                        <input type="text" id="notesTitle" placeholder="e.g., Chapter 1 Notes">
+                    </div>
+                    <div class="form-group">
+                        <label>Subject *</label>
+                        <select id="notesSubject">
+                            <option value="">Select Subject</option>
+                            <option value="Math">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="notesDescription" placeholder="Material description..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Upload File (PDF, DOC, DOCX) *</label>
+                        <input type="file" id="notesFile" accept=".pdf,.doc,.docx,.txt">
+                    </div>
+                    <button class="btn-primary" onclick="uploadNotes()">Upload Material</button>
+                </div>
+                <h3 style="margin-top: 40px;">Your Materials</h3>
+                <div class="notes-grid" id="teacherNotesList"></div>
             </section>
         </main>
     </div>
